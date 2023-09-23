@@ -11,13 +11,17 @@ dataset2 = pd.read_csv("dataset2.csv")
 dataset3 = pd.read_csv("dataset3.csv")
 dataset4 = pd.read_csv("dataset4.csv")
 
+dataset1.drop(columns=['channel_id'], inplace=True)
+dataset2.drop(columns=['channel_id'], inplace=True)
+dataset3.drop(columns=['channel_id'], inplace=True)
+dataset4.drop(columns=['channel_id'], inplace=True)
+
 # URL вашего API
 API_URL = "https://your_api_endpoint.com"
 
 # Отправляем dataset1.csv на API и замеряем время
 start_time = time()
 response = requests.post(API_URL, files={'file': StringIO(dataset1.to_csv(index=False))})
-end_time = time()
 
 # Если ответ успешен, преобразуем его в DataFrame
 if response.status_code == 200:
@@ -52,7 +56,7 @@ if response.status_code == 200:
         print(f"New Logic - F2 micro score: {f2_micro_score_new}")
     else:
         print(f"Second API request with dataset3 failed with status code {response_dataset3.status_code}. Response text: {response_dataset3.text}")
-
+    end_time = time()
     print(f"API execution time: {end_time - start_time} seconds")
 else:
     print(f"API request failed with status code {response.status_code}. Response text: {response.text}")
