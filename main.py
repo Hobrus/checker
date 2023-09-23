@@ -5,9 +5,11 @@ from sklearn.metrics import fbeta_score, precision_score, recall_score
 from io import StringIO
 from time import time
 
-# Загрузка dataset1 и dataset2
+# Загрузка dataset1, dataset2, dataset3 и dataset4
 dataset1 = pd.read_csv("dataset1.csv")
 dataset2 = pd.read_csv("dataset2.csv")
+dataset3 = pd.read_csv("dataset3.csv")
+dataset4 = pd.read_csv("dataset4.csv")
 
 # URL вашего API
 API_URL = "https://your_api_endpoint.com"
@@ -32,19 +34,24 @@ if response.status_code == 200:
     y_true_category = merged_data['category_true']
     y_pred_category = merged_data['category_pred']
     f2_micro_score_old = fbeta_score(y_true_category, y_pred_category, beta=2, average='micro')
-
     print(f"Old Logic - F2 micro score: {f2_micro_score_old}")
 
-    # Новая логика
-    y_true = dataset1['text'].isin(dataset2['text']).astype(int)
-    y_pred = (~dataset1['text'].isin(predicted_data['text'])).astype(int)
-    precision = precision_score(y_true, y_pred)
-    recall = recall_score(y_true, y_pred)
-    f2_micro_score_new = fbeta_score(y_true, y_pred, beta=2)
+    # Второй вызов к API с dataset3
+    response_dataset3 = requests.post(API_URL, files={'file': StringIO(dataset3.to_csv(index=False))})
+    if response_dataset3.status_code == 200:
+        predicted_data_from_dataset3 = pd.read_csv(StringIO(response_dataset3.text))
 
-    print(f"New Logic - Precision: {precision}")
-    print(f"New Logic - Recall: {recall}")
-    print(f"New Logic - F2 micro score: {f2_micro_score_new}")
+        # Новая логика
+        y_true = [1 if entry in dataset4.values.tolist() else 0 for entry in dataset3.values.tolist()]
+        y_pred = [1 if entry in predicted_data_from_dataset3.values.tolist() else 0 for entry in dataset3.values.tolist()]
+        precision = precision_score(y_true, y_pred)
+        recall = recall_score(y_true, y_pred)
+        f2_micro_score_new = fbeta_score(y_true, y_pred, beta=2, average='micro')
+        print(f"New Logic - Precision: {precision}")
+        print(f"New Logic - Recall: {recall}")
+        print(f"New Logic - F2 micro score: {f2_micro_score_new}")
+    else:
+        print(f"Second API request with dataset3 failed with status code {response_dataset3.status_code}. Response text: {response_dataset3.text}")
 
     print(f"API execution time: {end_time - start_time} seconds")
 else:
