@@ -17,12 +17,14 @@ dataset4 = pd.read_csv("dataset4.csv")
 #         ds.drop('channel_id', axis=1, inplace=True)
 
 # URL вашего API
-API_URL = "http://localhost:7777/get-filtered"
+API_URL = "http://localhost:8000/file_upload"
 
 # Отправляем dataset1.csv на API и замеряем время
 start_time = time()
-response = requests.post(API_URL, files={'file': StringIO(dataset1.to_csv(index=False))})
-
+response = requests.post(API_URL, files={'my_file': StringIO(dataset1.to_csv(index=False))})
+if response.status_code == 200:
+    API_URL = "http://localhost:8000/file_download?file=resp.csv"
+    response = requests.get(API_URL)
 # Если ответ успешен, преобразуем его в DataFrame
 if response.status_code == 200:
     predicted_data = pd.read_csv(StringIO(response.text))
@@ -41,7 +43,11 @@ if response.status_code == 200:
     print(f"Old Logic - F2 micro score: {f2_micro_score_old}")
 
     # Второй вызов к API с dataset3
-    response_dataset3 = requests.post(API_URL, files={'file': StringIO(dataset3.to_csv(index=False))})
+    API_URL = "http://localhost:8000/file_upload"
+    response_dataset3 = requests.post(API_URL, files={'my_file': StringIO(dataset3.to_csv(index=False))})
+    if response_dataset3.status_code == 200:
+        API_URL = "http://localhost:8000/file_download?file=resp.csv"
+        response_dataset3 = requests.get(API_URL)
     if response_dataset3.status_code == 200:
         predicted_data_from_dataset3 = pd.read_csv(StringIO(response_dataset3.text))
 

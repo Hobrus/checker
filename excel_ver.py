@@ -17,7 +17,7 @@ dataset4 = pd.read_excel("dataset4.xlsx")
 #         ds.drop('channel_id', axis=1, inplace=True)
 
 # URL вашего API
-API_URL = "http://localhost:7777/get-filtered"
+API_URL = "http://localhost:8000/api/zagruzka"
 
 # Отправляем dataset1.xlsx на API и замеряем время
 start_time = time()
@@ -26,6 +26,9 @@ dataset1.to_excel(output_buffer, index=False, engine='openpyxl')
 output_buffer.seek(0)
 
 response = requests.post(API_URL, files={'file': ('dataset1.xlsx', output_buffer, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')})
+if response.status_code == 200:
+    API_URL = "http://localhost:8000/api/vigruzka_for_chek"
+    response = requests.post(API_URL)
 
 # Если ответ успешен, преобразуем его в DataFrame
 if response.status_code == 200:
@@ -49,7 +52,11 @@ if response.status_code == 200:
     dataset3.to_excel(output_buffer2, index=False, engine='openpyxl')
     output_buffer2.seek(0)
 
+    API_URL = "http://localhost:8000/api/zagruzka"
     response_dataset3 = requests.post(API_URL, files={'file': ('dataset3.xlsx', output_buffer2, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')})
+    if response_dataset3.status_code == 200:
+        API_URL = "http://localhost:8000/api/vigruzka_for_chek"
+        response_dataset3 = requests.post(API_URL)
     if response_dataset3.status_code == 200:
         predicted_data_from_dataset3 = pd.read_excel(BytesIO(response_dataset3.content))
 
