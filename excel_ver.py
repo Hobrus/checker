@@ -60,9 +60,14 @@ if response.status_code == 200:
     if response_dataset3.status_code == 200:
         predicted_data_from_dataset3 = pd.read_excel(BytesIO(response_dataset3.content))
 
-        # Новая логика
-        y_true = [1 if entry in dataset4.values.tolist() else 0 for entry in dataset3.values.tolist()]
-        y_pred = [1 if entry in predicted_data_from_dataset3.values.tolist() else 0 for entry in dataset3.values.tolist()]
+        # Вместо преобразования всего датафрейма в список, вы преобразуете только столбец 'text'
+        dataset3_texts = dataset3['text'].values.tolist()
+        dataset4_texts = dataset4['text'].values.tolist()
+        predicted_texts = predicted_data_from_dataset3['text'].values.tolist()
+
+        # Теперь, когда вы проверяете, содержится ли текст в другом датафрейме, вы будете проверять только списки текстов
+        y_true = [1 if entry in dataset4_texts else 0 for entry in dataset3_texts]
+        y_pred = [1 if entry in predicted_texts else 0 for entry in dataset3_texts]
         precision = precision_score(y_true, y_pred)
         recall = recall_score(y_true, y_pred)
         f2_micro_score_new = fbeta_score(y_true, y_pred, beta=1, average='micro')
